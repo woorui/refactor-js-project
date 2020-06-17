@@ -17,22 +17,23 @@ struct Cli {
     /// The target extension, default ts
     #[structopt(short = "t", long = "target_extension", default_value = "ts")]
     target_extension: String,
+
+    count: i32,
 }
 
 impl Cli {
     fn change_extension(&self) -> io::Result<i32> {
-        change_extension(&self.path, &self.source_extension, &self.target_extension)
+        change_extension(&self.path, &self.source_extension, &self.target_extension, self.count)
     }
 }
 
-fn change_extension(dir: &Path, source_extension: &String, target_extension: &String) -> io::Result<i32> {
-    let mut n = 0;
+fn change_extension(dir: &Path, source_extension: &String, target_extension: &String, mut count: i32) -> io::Result<i32> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                change_extension(&path, source_extension, target_extension)?;
+                change_extension(&path, source_extension, target_extension, count)?;
             }
             let filename = entry.file_name();
             let file_name_str = filename.to_str().expect("file name cant convert to str");
@@ -44,18 +45,19 @@ fn change_extension(dir: &Path, source_extension: &String, target_extension: &St
             match extension {
                 Some(extension) => {
                     if extension == OsStr::new(&source_extension) && !name.is_empty() {
+                        println!("count => {}", count);
+                        count += 1;
                         let mut target = path.clone();
                         target.set_extension(&target_extension);
-                        println!("Will change {:?}, and It's num {}", target, n);
-                        fs::rename(path, target)?;
-                        n += 1;
+                        println!("Will change {:?}, and It's num {}", target, count);
+                        // fs::rename(path, target)?;
                     }
                 }
                 None => {}
             }
         }
     }
-    Ok(n)
+    Ok(count)
 }
 fn main() {
     match Cli::from_args().change_extension() {

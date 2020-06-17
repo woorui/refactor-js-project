@@ -39,7 +39,7 @@ Will change "./_family/children/daughter/Lisa.ts", and It's num 0
 The total number of changes was 1
 ```
 
-Dang Dang! your js project has refacted to ts project.
+Bingo! Your js project has refacted to ts project.
 
 ```bash
 $ tree ./_family/
