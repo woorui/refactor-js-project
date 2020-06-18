@@ -43,7 +43,6 @@ fn change_extension(dir: &Path, source_extension: &String, target_extension: &St
             match extension {
                 Some(extension) => {
                     if extension == OsStr::new(&source_extension) && !name.is_empty() {
-                        println!("count => {}", count);
                         count += 1;
                         let mut target = path.clone();
                         target.set_extension(&target_extension);
