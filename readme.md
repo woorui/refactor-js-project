@@ -30,13 +30,19 @@ Pass-in your project path.
 
 ```bash
 $ ./target/release/refactor-js-project --path ./_family/
-Will change "./_family/father/Jim.ts", and It's num 0
-Will change "./_family/index.ts", and It's num 0
-Will change "./_family/mother/Mary.ts", and It's num 0
-Will change "./_family/children/index.ts", and It's num 0
-Will change "./_family/children/son/Tom.ts", and It's num 0
-Will change "./_family/children/daughter/Lisa.ts", and It's num 0
-The total number of changes was 1
+count => 0
+Will change "./_family/children\\daughter\\Lisa.ts", and It's num 1
+count => 1
+Will change "./_family/children\\index.ts", and It's num 2
+count => 2
+Will change "./_family/children\\son\\Tom.ts", and It's num 3
+count => 3
+Will change "./_family/father\\Jim.ts", and It's num 4
+count => 4
+Will change "./_family\\index.ts", and It's num 5
+count => 5
+Will change "./_family/mother\\Mary.ts", and It's num 6
+The total number of changes was 6
 ```
 
 Bingo! Your js project has refacted to ts project.
