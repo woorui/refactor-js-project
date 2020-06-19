@@ -1,8 +1,7 @@
-use std::fs;
-use std::io;
 use std::path::{Path, PathBuf};
-use std::ffi::OsStr;
 use structopt::StructOpt;
+use std::fs;
+use glob::glob;
 
 /// Replace all file'extension from source_extension to target_extension
 #[derive(StructOpt)]
@@ -20,45 +19,27 @@ struct Cli {
 }
 
 impl Cli {
-    fn change_extension(&self) -> io::Result<i32> {
-        change_extension(&self.path, &self.source_extension, &self.target_extension, 0)
-    }
-}
-
-fn change_extension(dir: &Path, source_extension: &String, target_extension: &String, mut count: i32) -> io::Result<i32> {
-    if dir.is_dir() {
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let path = entry.path();
-            if path.is_dir() {
-                count = change_extension(&path, source_extension, target_extension, count)?;
-            }
-            let filename = entry.file_name();
-            let file_name_str = filename.to_str().expect("file name cant convert to str");
-            let splited = file_name_str.split(".").collect::<Vec<&str>>();
-
-            let name = splited[0];
-            let extension = path.extension();
-
-            match extension {
-                Some(extension) => {
-                    if extension == OsStr::new(&source_extension) && !name.is_empty() {
-                        count += 1;
-                        let mut target = path.clone();
-                        target.set_extension(&target_extension);
-                        println!("Will change {:?}, and It's num {}", target, count);
-                        fs::rename(path, target)?;
-                    }
+    fn change_extension_in_glob(&self) -> i32  {
+        let mut count: i32 = 0;
+        let path = Path::new(&self.path).join("**/*".to_owned() + &self.source_extension);
+        println!("{:?}", path);
+        let pattern = path.to_str().expect("Parse pattern error");
+        for entry in glob(pattern).expect("Failed to read glob pattern") {
+            match entry {
+                Ok(path) => {
+                    count += 1;
+                    let mut target = path.clone();
+                    target.set_extension(&self.target_extension);
+                    println!("Will change {}, and It's No {}", target.display(), count);
+                    fs::rename(path, target).expect("Failed to rename")
                 }
-                None => {}
+                Err(e) => println!("{:?}", e),
             }
-        }
+        };
+        count
     }
-    Ok(count)
 }
+
 fn main() {
-    match Cli::from_args().change_extension() {
-        Ok (change_file_count) => println!("The total number of changes was {}", change_file_count),
-        Err(e) => eprintln!("It is error that {}", e),
-    }
+    println!("The total number of changes was {}", Cli::from_args().change_extension_in_glob());
 }
