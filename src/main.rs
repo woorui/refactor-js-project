@@ -22,7 +22,6 @@ impl Cli {
     fn change_extension_in_glob(&self) -> i32  {
         let mut count: i32 = 0;
         let path = Path::new(&self.path).join("**/*".to_owned() + &self.source_extension);
-        println!("{:?}", path);
         let pattern = path.to_str().expect("Parse pattern error");
         for entry in glob(pattern).expect("Failed to read glob pattern") {
             match entry {
