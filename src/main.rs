@@ -1,7 +1,9 @@
 use std::path::{Path, PathBuf};
 use structopt::StructOpt;
-use std::fs;
+use std::{fs, process};
 use glob::glob;
+use std::error::Error;
+
 
 /// Replace all file'extension from source_extension to target_extension
 #[derive(StructOpt)]
@@ -19,26 +21,26 @@ struct Cli {
 }
 
 impl Cli {
-    fn change_extension_in_glob(&self) -> i32  {
+    fn change_extension_in_glob(&self) -> Result<i32, Box<dyn Error>>  {
         let mut count: i32 = 0;
         let path = Path::new(&self.path).join("**/*".to_owned() + &self.source_extension);
-        let pattern = path.to_str().expect("Parse pattern error");
-        for entry in glob(pattern).expect("Failed to read glob pattern") {
-            match entry {
-                Ok(path) => {
-                    count += 1;
-                    let mut target = path.clone();
-                    target.set_extension(&self.target_extension);
-                    println!("Will change {}, and It's No {}", target.display(), count);
-                    fs::rename(path, target).expect("Failed to rename")
-                }
-                Err(e) => println!("{:?}", e),
-            }
+        let pattern = path.to_str().expect("Failed to parse glob pattern");
+        for entry in glob(pattern)? {
+            let p = entry?;
+            count += 1;
+            let mut target = p.clone();
+            target.set_extension(&self.target_extension);
+            println!("Will change {}, and It's No {}", target.display(), count);
+            fs::rename(p, target)?
         };
-        count
+        Ok(count)
     }
 }
 
 fn main() {
-    println!("The total number of changes was {}", Cli::from_args().change_extension_in_glob());
+    let count = Cli::from_args().change_extension_in_glob().unwrap_or_else(|e| {
+        println!("Refactor error {}", e);
+        process::exit(1);
+    });
+    println!("The total number of changes was {}", count);
 }
