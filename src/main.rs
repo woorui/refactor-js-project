@@ -12,10 +12,10 @@ struct Cli {
     /// The path to the file to read
     #[structopt(short = "p", long = "path", parse(from_os_str))]
     path: PathBuf,
-    /// The source extension, default js
+    /// The source extension
     #[structopt(short = "s", long = "source_extension", default_value = "js")]
     source_extension: String,
-    /// The target extension, default ts
+    /// The target extension
     #[structopt(short = "t", long = "target_extension", default_value = "ts")]
     target_extension: String,
 }
@@ -39,7 +39,7 @@ impl Cli {
 
 fn main() {
     let count = Cli::from_args().change_extension_in_glob().unwrap_or_else(|e| {
-        println!("Refactor error {}", e);
+        eprintln!("Refactor error {}", e);
         process::exit(1);
     });
     println!("The total number of changes was {}", count);
